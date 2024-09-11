@@ -15,7 +15,7 @@ pipeline {
             steps {
                 echo 'Running Selenium tests...'
                 script {
-                    sh 'python3 run_selenium_tests.py'  // Add the test script later
+                    sh 'python3 run_selenium_tests.py'
                 }
             }
         }
@@ -43,6 +43,30 @@ pipeline {
                 echo 'Promoting to production environment...'
                 script {
                     sh 'scp index.html user@production-server:/var/www/html/'
+                }
+            }
+        }
+
+        // Monitoring and Alerting stage
+        stage('Monitoring and Alerting') {
+            steps {
+                echo 'Setting up Monitoring and Alerting...'
+                script {
+                    // Example using Datadog or New Relic APIs to ensure the monitoring is active
+                    // For Datadog:
+                    sh '''
+                    curl -X POST \
+                    -H "DD-API-KEY: your-datadog-api-key" \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                        "monitor_name": "Website Uptime Monitor",
+                        "query": "avg(last_5m):avg:http.response_time{*} > 500",
+                        "type": "metric alert",
+                        "message": "Alert: High response time detected!",
+                        "tags": ["env:production"]
+                    }' \
+                    "https://api.datadoghq.com/api/v1/monitor"
+                    '''
                 }
             }
         }
